@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  schemaspy:
+    image: schemaspy/schemaspy
+    volumes:
+      - ./output:/output
+    command: -t pgsql -db test -host localhost -port 5432 -u postgres -p postgres -o /output

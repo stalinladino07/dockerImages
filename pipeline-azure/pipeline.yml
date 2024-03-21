@@ -1,0 +1,27 @@
+name: ProjectBase
+
+trigger:
+  - development
+
+trigger:
+  branches:
+    include:
+      - master
+    exclude:
+      - development
+
+variables:
+  name: devops
+  frase: Hello
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - job: work1
+  steps:
+    - script: echo " ${frase}, ${name}"
+
+  - job: work2
+  steps:
+    - script: echo " ${frase}, ${name}"

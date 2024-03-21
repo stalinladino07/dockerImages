@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  jenkins:
+    user: root
+    image: "jenkins/jenkins"
+    ports:
+      - "8080:8080"
+    volumes:
+      - jenkins_vol_dp:/var/jenkins_home
+
+volumes:
+  jenkins_vol_dp:

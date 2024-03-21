@@ -1,0 +1,12 @@
+# Config Docker wildfly
+
+Levantamiento Wildfly docker
+
+## Instalación
+
+Instrucciones para instalar y configurar el jboss
+
+1. Ejecutar comando
+
+```bash
+docker run -p 8080:8080 -p 9990:9990 -it jboss/wildfly-admin /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
