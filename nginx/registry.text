@@ -1,1 +1,129 @@
 
+user  nginx;
+worker_processes  auto;
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+events {
+    worker_connections  1024;
+}
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile        on;
+    #tcp_nopush     on;
+    client_max_body_size 2000M;
+    keepalive_timeout  65;
+    #gzip  on;
+    include /etc/nginx/conf.d/*.conf;
+
+   #upstream backend {
+   #   server 172.16.54.4:8443;
+  #  }
+
+
+server {
+      server_name qaapps.qph.com.ec;
+      listen 443 ssl http2;
+
+      ssl_certificate /etc/ssl/certs/cert.pem;
+      ssl_certificate_key /etc/ssl/certs/key.key;
+
+ # location /calificacionclientes {
+ # root /etc/nginx;
+  #  try_files $uri $uri/ /index.html;
+  #}
+
+ # location /negociospublicitariosMLD {
+ # root /etc/nginx;
+ #   try_files $uri $uri/ /index.html;
+ # }
+
+   #   location /calificacionCliente {
+    #       proxy_pass https://backend;
+
+     #      proxy_redirect off;
+      #     proxy_set_header Host $host;
+       #    proxy_set_header X-Real-IP $remote_addr;
+        #   proxy_set_header X-Forwarded-For $remote_addr;
+         #  proxy_set_header X-Forwarded-Proto $scheme;
+          # proxy_set_header X-Forwarded-Port 443;
+     # }
+
+ #     location /negociosPublicitariosMLD {
+ #          proxy_pass https://backend;
+
+ #          proxy_redirect off;
+ #          proxy_set_header Host $host;
+ #          proxy_set_header X-Real-IP $remote_addr;
+ #         proxy_set_header X-Forwarded-For $remote_addr;
+ #          proxy_set_header X-Forwarded-Proto $scheme;
+ #          proxy_set_header X-Forwarded-Port 443;
+ #     }
+
+      location /truemediaplanner {
+        proxy_pass http://172.16.54.4:8094/truemediaplanner;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+     }
+      location /registry {
+        proxy_pass http://172.16.54.4:5000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+     }
+    location /registry/v2 {
+        proxy_pass http://172.16.54.4:5000/v2/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+     }
+    location /v2 {
+        proxy_pass http://172.16.54.4:5000/v2;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+     }
+
+      location /negociospublicitariosMLD {
+        proxy_pass http://172.16.54.4:8084/negociospublicitariosMLD;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+     location /negociosPublicitariosMLD {
+        proxy_pass http://172.16.54.4:8095/negociosPublicitariosMLD;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    
+    location /qphGestionEncuestas {
+        proxy_pass http://172.16.54.4:8010/qphGestionEncuestas;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    
+    location /seguimientoseguridad {
+        proxy_pass http://172.16.54.4:8080/seguimientoseguridad;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+ 
+}
+}
