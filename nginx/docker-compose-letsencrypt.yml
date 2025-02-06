@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./vhostd:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+  
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion:stable
+    restart: always
+    volumes:
+      - ./certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./vhostd:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      
+  billcorp-back:
+    image: ladinodocker/billcorp-back:v7-R1
+    restart: always
+    expose:
+      - 8080
+    environment:
+      - VIRTUAL_HOST=api.sistemainventario.billcorp.ec
+      - LETSENCRYPT_HOST=api.sistemainventario.billcorp.ec
+      - LETSENCRYPT_EMAIL=ladinostalin07@gmail.com
+      
+  billcorp-front:
+    image: ladinodocker/billcorp-front:v10-R1
+    restart: always
+    expose:
+      - 80
+    environment:
+      - VIRTUAL_HOST=sistemainventario.billcorp.ec
+      - LETSENCRYPT_HOST=sistemainventario.billcorp.ec
+      - LETSENCRYPT_EMAIL=ladinostalin07@gmail.com
