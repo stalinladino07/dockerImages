@@ -1,0 +1,87 @@
+version: "3.7"
+
+services:
+
+  # =========================
+  # ZOOKEEPER
+  # =========================
+  zookeeper:
+    hostname: myzookeeper
+    container_name: zookeeper_container_persistent
+    image: bitnami/zookeeper:3.7.0
+    restart: unless-stopped
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nifi-net
+
+  # =========================
+  # NIFI REGISTRY
+  # =========================
+  registry:
+    hostname: myregistry
+    container_name: registry_container_persistent
+    image: apache/nifi-registry:1.15.0
+    restart: unless-stopped
+    ports:
+      - "18080:18080"
+    environment:
+      - LOG_LEVEL=INFO
+      - NIFI_REGISTRY_DB_DIR=/opt/nifi-registry/nifi-registry-current/database
+      - NIFI_REGISTRY_FLOW_PROVIDER=file
+      - NIFI_REGISTRY_FLOW_STORAGE_DIR=/opt/nifi-registry/nifi-registry-current/flow_storage
+    volumes:
+      - ./nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
+      - ./nifi_registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - nifi-net
+
+  # =========================
+  # APACHE NIFI (SINGLE NODE)
+  # =========================
+  nifi:
+    hostname: mynifi
+    container_name: nifi_container_persistent
+    image: apache/nifi:1.14.0
+    restart: unless-stopped
+    ports:
+      - "8091:8080"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+      - NIFI_CLUSTER_IS_NODE=false
+      - NIFI_ZK_CONNECT_STRING=myzookeeper:2181
+      - NIFI_SENSITIVE_PROPS_KEY=12345678901234567890A
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/nifi-api/system-diagnostics"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./nifi/state:/opt/nifi/nifi-current/state
+      - ./nifi/logs:/opt/nifi/nifi-current/logs
+      # SOLO descomenta si quieres persistir config manualmente
+      # - ./nifi/conf:/opt/nifi/nifi-current/conf
+    networks:
+      - nifi-net
+
+# =========================
+# NETWORK
+# =========================
+networks:
+  nifi-net:
+    driver: bridge
